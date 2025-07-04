@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Header } from "@/components/Layout/Header";
-import { Auth } from "./Auth";
-import { Dashboard } from "./Dashboard";
-import { Ranking } from "./Ranking";
+import Auth from "./Auth";
+import Dashboard from "./Dashboard";
+import Ranking from "./Ranking";
 import { Admin } from "./Admin";
 import { useToast } from "@/hooks/use-toast";
 
