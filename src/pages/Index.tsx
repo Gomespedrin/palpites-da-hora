@@ -3,7 +3,7 @@ import { Header } from "@/components/Layout/Header";
 import Auth from "./Auth";
 import Dashboard from "./Dashboard";
 import Ranking from "./Ranking";
-import { Admin } from "./Admin";
+import Admin from "./Admin";
 import { useToast } from "@/hooks/use-toast";
 
 interface User {
@@ -64,18 +64,18 @@ const Index = () => {
 
     switch (currentPage) {
       case "dashboard":
-        return <Dashboard user={user} />;
+        return <Dashboard />;
       case "ranking":
-        return <Ranking currentUserId={user.id} />;
+        return <Ranking />;
       case "admin":
         return <Admin />;
       default:
-        return <Dashboard user={user} />;
+        return <Dashboard />;
     }
   };
 
   if (!user) {
-    return <Auth onLogin={handleLogin} onRegister={handleRegister} />;
+    return <Auth />;
   }
 
   return (

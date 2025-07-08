@@ -3,15 +3,12 @@ import { GameCard } from "@/components/Game/GameCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 
-interface DashboardProps {
-  user: {
-    id: string;
-    nickname: string;
-    pointsTotal: number;
-  };
-}
-
 // Mock data - substituir por integração real
+const mockUser = {
+  id: "1",
+  nickname: "CraqueDoFlamengo",
+  pointsTotal: 85,
+};
 const mockGames = [
   {
     id: "1",
@@ -37,7 +34,7 @@ const mockGames = [
   },
 ];
 
-export const Dashboard = ({ user }: DashboardProps) => {
+const Dashboard = () => {
   const [games, setGames] = useState(mockGames);
   const [currentRound, setCurrentRound] = useState("Rodada 1 - Brasileirão");
 
@@ -60,7 +57,7 @@ export const Dashboard = ({ user }: DashboardProps) => {
       <Card className="bg-gradient-card shadow-elegant">
         <CardHeader>
           <CardTitle className="text-2xl">
-            Olá, {user.nickname}! ⚽
+            Olá, {mockUser.nickname}! ⚽
           </CardTitle>
           <div className="flex items-center justify-between">
             <Badge variant="default" className="text-sm">
@@ -68,7 +65,7 @@ export const Dashboard = ({ user }: DashboardProps) => {
             </Badge>
             <div className="text-right">
               <div className="text-sm text-muted-foreground">Seus pontos</div>
-              <div className="text-2xl font-bold text-primary">{user.pointsTotal}</div>
+              <div className="text-2xl font-bold text-primary">{mockUser.pointsTotal}</div>
             </div>
           </div>
         </CardHeader>
@@ -141,7 +138,7 @@ export const Dashboard = ({ user }: DashboardProps) => {
         
         <Card>
           <CardContent className="text-center py-6">
-            <div className="text-3xl font-bold text-success">{user.pointsTotal}</div>
+            <div className="text-3xl font-bold text-success">{mockUser.pointsTotal}</div>
             <div className="text-sm text-muted-foreground">Total de Pontos</div>
           </CardContent>
         </Card>
@@ -149,3 +146,5 @@ export const Dashboard = ({ user }: DashboardProps) => {
     </div>
   );
 };
+
+export default Dashboard;

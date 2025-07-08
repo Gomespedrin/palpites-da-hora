@@ -16,7 +16,7 @@ interface Game {
   finished: boolean;
 }
 
-export const Admin = () => {
+const Admin = () => {
   const [games, setGames] = useState<Game[]>([
     {
       id: "1",
@@ -198,6 +198,8 @@ export const Admin = () => {
     </div>
   );
 };
+
+export default Admin;
 
 interface GameAdminCardProps {
   game: Game;
