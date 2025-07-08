@@ -2,54 +2,30 @@ import { useState, useEffect } from "react";
 import { GameCard } from "@/components/Game/GameCard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-
-// Mock data - substituir por integração real
-const mockUser = {
-  id: "1",
-  nickname: "CraqueDoFlamengo",
-  pointsTotal: 85,
-};
-const mockGames = [
-  {
-    id: "1",
-    teamA: "Flamengo",
-    teamB: "Palmeiras",
-    dateTime: "2024-07-05T20:00:00",
-    userBet: { betA: 2, betB: 1 },
-  },
-  {
-    id: "2",
-    teamA: "São Paulo",
-    teamB: "Corinthians",
-    dateTime: "2024-07-06T16:00:00",
-  },
-  {
-    id: "3",
-    teamA: "Vasco",
-    teamB: "Botafogo",
-    dateTime: "2024-07-03T19:00:00",
-    locked: true,
-    result: { scoreA: 1, scoreB: 2 },
-    userBet: { betA: 1, betB: 1 },
-  },
-];
+import { useAuth } from "@/hooks/useAuth";
+import { useGames } from "@/hooks/useGames";
 
 const Dashboard = () => {
-  const [games, setGames] = useState(mockGames);
-  const [currentRound, setCurrentRound] = useState("Rodada 1 - Brasileirão");
+  const { profile } = useAuth();
+  const { games, currentRound, submitBet } = useGames();
 
   const handleBetSubmit = (gameId: string, betA: number, betB: number) => {
-    setGames(prevGames =>
-      prevGames.map(game =>
-        game.id === gameId
-          ? { ...game, userBet: { betA, betB } }
-          : game
-      )
-    );
+    submitBet(gameId, betA, betB);
   };
 
-  const openGames = games.filter(game => !game.locked && !game.result);
-  const closedGames = games.filter(game => game.locked || game.result);
+  // Filter games based on current time and game status
+  const now = new Date();
+  const openGames = games.filter(game => {
+    const gameTime = new Date(game.date_time);
+    const cutoffTime = new Date(gameTime.getTime() - 30 * 60 * 1000); // 30 minutes before
+    return !game.finished && now < cutoffTime;
+  });
+  
+  const closedGames = games.filter(game => {
+    const gameTime = new Date(game.date_time);
+    const cutoffTime = new Date(gameTime.getTime() - 30 * 60 * 1000);
+    return game.finished || now >= cutoffTime;
+  });
 
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
@@ -57,15 +33,15 @@ const Dashboard = () => {
       <Card className="bg-gradient-card shadow-elegant">
         <CardHeader>
           <CardTitle className="text-2xl">
-            Olá, {mockUser.nickname}! ⚽
+            Olá, {profile?.nickname || 'Usuário'}! ⚽
           </CardTitle>
           <div className="flex items-center justify-between">
             <Badge variant="default" className="text-sm">
-              {currentRound}
+              {currentRound?.name || 'Nenhuma rodada ativa'}
             </Badge>
             <div className="text-right">
               <div className="text-sm text-muted-foreground">Seus pontos</div>
-              <div className="text-2xl font-bold text-primary">{mockUser.pointsTotal}</div>
+              <div className="text-2xl font-bold text-primary">{profile?.points_total || 0}</div>
             </div>
           </div>
         </CardHeader>
@@ -138,7 +114,7 @@ const Dashboard = () => {
         
         <Card>
           <CardContent className="text-center py-6">
-            <div className="text-3xl font-bold text-success">{mockUser.pointsTotal}</div>
+            <div className="text-3xl font-bold text-success">{profile?.points_total || 0}</div>
             <div className="text-sm text-muted-foreground">Total de Pontos</div>
           </CardContent>
         </Card>

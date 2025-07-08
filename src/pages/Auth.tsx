@@ -1,59 +1,28 @@
 import { useNavigate } from 'react-router-dom';
 import { AuthForm } from '@/components/Auth/AuthForm';
-import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
+  const { signIn, signUp } = useAuth();
 
   const handleLogin = async (email: string, password: string) => {
-    // Mock login - substituir por API real
-    console.log('Login:', { email, password });
-    
-    // Simular requisição
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    localStorage.setItem('auth_token', 'mock-token');
-    
-    toast({
-      title: 'Login realizado!',
-      description: `Bem-vindo de volta!`,
-    });
-    
-    navigate('/dashboard');
+    const { data } = await signIn(email, password);
+    if (data?.user) {
+      navigate('/dashboard');
+    }
   };
 
   const handleRegister = async (email: string, password: string, nickname: string, phone?: string) => {
-    // Mock register - substituir por API real
-    console.log('Register:', { email, password, nickname, phone });
-    
-    // Simular requisição
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    localStorage.setItem('auth_token', 'mock-token');
-    
-    toast({
-      title: 'Conta criada!',
-      description: `Bem-vindo ao Palpites da Hora, ${nickname}!`,
-    });
-    
-    navigate('/dashboard');
+    const { data } = await signUp(email, password, nickname);
+    if (data?.user) {
+      navigate('/dashboard');
+    }
   };
 
   const handleGoogleLogin = async () => {
-    // Mock Google login - substituir por OAuth real
-    console.log('Google login');
-    
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    localStorage.setItem('auth_token', 'mock-google-token');
-    
-    toast({
-      title: 'Login realizado!',
-      description: 'Bem-vindo de volta!',
-    });
-    
-    navigate('/dashboard');
+    // TODO: Implementar Google OAuth
+    console.log('Google login - to be implemented');
   };
 
   return (

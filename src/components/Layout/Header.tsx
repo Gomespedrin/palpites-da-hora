@@ -8,9 +8,10 @@ interface HeaderProps {
   onLogout: () => void;
   currentPage: string;
   onNavigate: (page: string) => void;
+  isAdmin?: boolean;
 }
 
-export const Header = ({ user, onLogout, currentPage, onNavigate }: HeaderProps) => {
+export const Header = ({ user, onLogout, currentPage, onNavigate, isAdmin }: HeaderProps) => {
   return (
     <header className="bg-gradient-primary shadow-elegant">
       <div className="container mx-auto px-4 py-4">
@@ -45,13 +46,15 @@ export const Header = ({ user, onLogout, currentPage, onNavigate }: HeaderProps)
                 >
                   Ranking
                 </Button>
-                <Button
-                  variant={currentPage === "admin" ? "secondary" : "ghost"}
-                  onClick={() => onNavigate("admin")}
-                  className="text-white hover:bg-white/20"
-                >
-                  Admin
-                </Button>
+                {isAdmin && (
+                  <Button
+                    variant={currentPage === "admin" ? "secondary" : "ghost"}
+                    onClick={() => onNavigate("admin")}
+                    className="text-white hover:bg-white/20"
+                  >
+                    Admin
+                  </Button>
+                )}
               </nav>
 
               {/* User Points */}
@@ -96,14 +99,16 @@ export const Header = ({ user, onLogout, currentPage, onNavigate }: HeaderProps)
             >
               Ranking
             </Button>
-            <Button
-              variant={currentPage === "admin" ? "secondary" : "ghost"}
-              onClick={() => onNavigate("admin")}
-              className="flex-1 text-white hover:bg-white/20"
-              size="sm"
-            >
-              Admin
-            </Button>
+            {isAdmin && (
+              <Button
+                variant={currentPage === "admin" ? "secondary" : "ghost"}
+                onClick={() => onNavigate("admin")}
+                className="flex-1 text-white hover:bg-white/20"
+                size="sm"
+              >
+                Admin
+              </Button>
+            )}
           </nav>
         )}
       </div>

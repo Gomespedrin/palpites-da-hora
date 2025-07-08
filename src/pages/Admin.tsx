@@ -1,49 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-
-interface Game {
-  id: string;
-  teamA: string;
-  teamB: string;
-  dateTime: string;
-  scoreA?: number;
-  scoreB?: number;
-  finished: boolean;
-}
+import { useAdmin } from "@/hooks/useAdmin";
+import { useGames } from "@/hooks/useGames";
+import { supabase } from "@/lib/supabase";
 
 const Admin = () => {
-  const [games, setGames] = useState<Game[]>([
-    {
-      id: "1",
-      teamA: "Flamengo",
-      teamB: "Palmeiras",
-      dateTime: "2024-07-05T20:00:00",
-      finished: false,
-    },
-    {
-      id: "2",
-      teamA: "São Paulo",
-      teamB: "Corinthians",
-      dateTime: "2024-07-06T16:00:00",
-      finished: false,
-    },
-  ]);
-
+  const [allGames, setAllGames] = useState<any[]>([]);
+  const [rounds, setRounds] = useState<any[]>([]);
+  const [currentRound, setCurrentRound] = useState<any>(null);
   const [newGame, setNewGame] = useState({
     teamA: "",
     teamB: "",
     dateTime: "",
   });
-
-  const [roundName, setRoundName] = useState("Rodada 1 - Brasileirão");
+  const [roundName, setRoundName] = useState("");
+  
   const { toast } = useToast();
+  const { createRound, createGame, finishGame, loading } = useAdmin();
 
-  const handleCreateGame = () => {
+  useEffect(() => {
+    fetchRounds();
+    fetchAllGames();
+  }, []);
+
+  const fetchRounds = async () => {
+    const { data } = await supabase
+      .from('rounds')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    setRounds(data || []);
+    const activeRound = data?.find(round => round.status === 'aberta');
+    setCurrentRound(activeRound || data?.[0]);
+  };
+
+  const fetchAllGames = async () => {
+    const { data } = await supabase
+      .from('games')
+      .select('*')
+      .order('date_time');
+    
+    setAllGames(data || []);
+  };
+
+  const handleCreateRound = async () => {
+    if (!roundName) {
+      toast({
+        title: "Campo obrigatório",
+        description: "Digite o nome da rodada.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const { data } = await createRound(roundName);
+    if (data) {
+      setRoundName("");
+      fetchRounds();
+    }
+  };
+
+  const handleCreateGame = async () => {
     if (!newGame.teamA || !newGame.teamB || !newGame.dateTime) {
       toast({
         title: "Campos obrigatórios",
@@ -53,36 +75,33 @@ const Admin = () => {
       return;
     }
 
-    const game: Game = {
-      id: Date.now().toString(),
-      teamA: newGame.teamA,
-      teamB: newGame.teamB,
-      dateTime: newGame.dateTime,
-      finished: false,
-    };
+    if (!currentRound) {
+      toast({
+        title: "Erro",
+        description: "Crie uma rodada primeiro.",
+        variant: "destructive",
+      });
+      return;
+    }
 
-    setGames([...games, game]);
-    setNewGame({ teamA: "", teamB: "", dateTime: "" });
+    const { data } = await createGame(
+      currentRound.id,
+      newGame.teamA,
+      newGame.teamB,
+      newGame.dateTime
+    );
     
-    toast({
-      title: "Jogo criado!",
-      description: `${game.teamA} x ${game.teamB} adicionado à rodada.`,
-    });
+    if (data) {
+      setNewGame({ teamA: "", teamB: "", dateTime: "" });
+      fetchAllGames();
+    }
   };
 
-  const handleFinishGame = (gameId: string, scoreA: number, scoreB: number) => {
-    setGames(prevGames =>
-      prevGames.map(game =>
-        game.id === gameId
-          ? { ...game, scoreA, scoreB, finished: true }
-          : game
-      )
-    );
-
-    toast({
-      title: "Resultado registrado!",
-      description: "Pontos dos usuários foram recalculados.",
-    });
+  const handleFinishGame = async (gameId: string, scoreA: number, scoreB: number) => {
+    const { data } = await finishGame(gameId, scoreA, scoreB);
+    if (data) {
+      fetchAllGames();
+    }
   };
 
   const formatDateTime = (dateTime: string) => {
@@ -113,21 +132,22 @@ const Admin = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="roundName">Nome da Rodada</Label>
+            <Label htmlFor="roundName">Nome da Nova Rodada</Label>
             <Input
               id="roundName"
               value={roundName}
               onChange={(e) => setRoundName(e.target.value)}
-              placeholder="Ex: Rodada 1 - Brasileirão"
+              placeholder="Ex: Rodada 2 - Brasileirão"
             />
           </div>
-          <Button variant="sport" onClick={() => {
-            toast({
-              title: "Rodada atualizada!",
-              description: `Nome alterado para: ${roundName}`,
-            });
-          }}>
-            Atualizar Rodada
+          {currentRound && (
+            <div className="p-3 bg-muted rounded-lg">
+              <div className="text-sm font-medium">Rodada Ativa</div>
+              <div className="text-lg">{currentRound.name}</div>
+            </div>
+          )}
+          <Button variant="sport" onClick={handleCreateRound} disabled={loading}>
+            {loading ? "Criando..." : "Criar Nova Rodada"}
           </Button>
         </CardContent>
       </Card>
@@ -167,8 +187,8 @@ const Admin = () => {
               />
             </div>
           </div>
-          <Button onClick={handleCreateGame} variant="hero" className="w-full">
-            Criar Jogo
+          <Button onClick={handleCreateGame} variant="hero" className="w-full" disabled={loading || !currentRound}>
+            {loading ? "Criando..." : "Criar Jogo"}
           </Button>
         </CardContent>
       </Card>
@@ -180,14 +200,14 @@ const Admin = () => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {games.map((game) => (
+            {allGames.map((game) => (
               <GameAdminCard
                 key={game.id}
                 game={game}
                 onFinishGame={handleFinishGame}
               />
             ))}
-            {games.length === 0 && (
+            {allGames.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 Nenhum jogo criado ainda.
               </div>
@@ -202,7 +222,7 @@ const Admin = () => {
 export default Admin;
 
 interface GameAdminCardProps {
-  game: Game;
+  game: any;
   onFinishGame: (gameId: string, scoreA: number, scoreB: number) => void;
 }
 
@@ -225,7 +245,7 @@ const GameAdminCard = ({ game, onFinishGame }: GameAdminCardProps) => {
     <div className="border rounded-lg p-4 space-y-3">
       <div className="flex items-center justify-between">
         <div className="font-semibold">
-          {game.teamA} x {game.teamB}
+          {game.team_a} x {game.team_b}
         </div>
         <Badge variant={game.finished ? "secondary" : "default"}>
           {game.finished ? "Finalizado" : "Pendente"}
@@ -233,13 +253,13 @@ const GameAdminCard = ({ game, onFinishGame }: GameAdminCardProps) => {
       </div>
       
       <div className="text-sm text-muted-foreground">
-        📅 {new Date(game.dateTime).toLocaleString('pt-BR')}
+        📅 {new Date(game.date_time).toLocaleString('pt-BR')}
       </div>
 
       {game.finished ? (
         <div className="bg-muted/50 rounded p-3 text-center">
           <div className="text-lg font-bold">
-            Resultado: {game.scoreA} - {game.scoreB}
+            Resultado: {game.score_a} - {game.score_b}
           </div>
         </div>
       ) : (

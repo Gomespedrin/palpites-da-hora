@@ -8,31 +8,33 @@ import { useToast } from "@/hooks/use-toast";
 interface GameCardProps {
   game: {
     id: string;
-    teamA: string;
-    teamB: string;
-    dateTime: string;
-    locked?: boolean;
-    userBet?: {
-      betA: number;
-      betB: number;
-    };
-    result?: {
-      scoreA: number;
-      scoreB: number;
-    };
+    team_a: string;
+    team_b: string;
+    date_time: string;
+    finished?: boolean;
+    score_a?: number;
+    score_b?: number;
+    bets?: Array<{
+      bet_a: number;
+      bet_b: number;
+      points_awarded?: number;
+      locked: boolean;
+    }>;
   };
   onBetSubmit: (gameId: string, betA: number, betB: number) => void;
 }
 
 export const GameCard = ({ game, onBetSubmit }: GameCardProps) => {
-  const [betA, setBetA] = useState(game.userBet?.betA?.toString() || "");
-  const [betB, setBetB] = useState(game.userBet?.betB?.toString() || "");
+  const userBet = game.bets?.[0]; // Assuming first bet is current user's bet
+  const [betA, setBetA] = useState(userBet?.bet_a?.toString() || "");
+  const [betB, setBetB] = useState(userBet?.bet_b?.toString() || "");
   const { toast } = useToast();
 
-  const gameDate = new Date(game.dateTime);
+  const gameDate = new Date(game.date_time);
   const now = new Date();
-  const isLocked = game.locked || gameDate.getTime() - now.getTime() < 30 * 60 * 1000; // 30 min antes
-  const hasResult = !!game.result;
+  const cutoffTime = new Date(gameDate.getTime() - 30 * 60 * 1000); // 30 min antes
+  const isLocked = game.finished || now >= cutoffTime || userBet?.locked;
+  const hasResult = game.finished && (game.score_a !== undefined && game.score_b !== undefined);
 
   const handleSubmit = () => {
     const scoreA = parseInt(betA);
@@ -48,10 +50,6 @@ export const GameCard = ({ game, onBetSubmit }: GameCardProps) => {
     }
 
     onBetSubmit(game.id, scoreA, scoreB);
-    toast({
-      title: "Palpite salvo!",
-      description: `${game.teamA} ${scoreA} x ${scoreB} ${game.teamB}`,
-    });
   };
 
   const formatDateTime = (dateTime: string) => {
@@ -71,7 +69,7 @@ export const GameCard = ({ game, onBetSubmit }: GameCardProps) => {
             {isLocked ? "Fechado" : "Aberto"}
           </Badge>
           <span className="text-sm text-muted-foreground">
-            {formatDateTime(game.dateTime)}
+            {formatDateTime(game.date_time)}
           </span>
         </div>
       </CardHeader>
@@ -80,11 +78,11 @@ export const GameCard = ({ game, onBetSubmit }: GameCardProps) => {
         {/* Times */}
         <div className="flex items-center justify-between text-center">
           <div className="flex-1">
-            <div className="font-semibold text-lg">{game.teamA}</div>
+            <div className="font-semibold text-lg">{game.team_a}</div>
           </div>
           <div className="mx-4 text-2xl font-bold text-muted-foreground">VS</div>
           <div className="flex-1">
-            <div className="font-semibold text-lg">{game.teamB}</div>
+            <div className="font-semibold text-lg">{game.team_b}</div>
           </div>
         </div>
 
@@ -93,8 +91,15 @@ export const GameCard = ({ game, onBetSubmit }: GameCardProps) => {
           <div className="bg-gradient-card rounded-lg p-3 text-center">
             <div className="text-sm text-muted-foreground mb-1">Resultado Final</div>
             <div className="text-2xl font-bold text-primary">
-              {game.result!.scoreA} - {game.result!.scoreB}
+              {game.score_a} - {game.score_b}
             </div>
+            {userBet && userBet.points_awarded !== undefined && (
+              <div className="text-sm mt-2">
+                <Badge variant={userBet.points_awarded > 0 ? "default" : "secondary"}>
+                  {userBet.points_awarded > 0 ? `+${userBet.points_awarded} pts` : '0 pts'}
+                </Badge>
+              </div>
+            )}
           </div>
         )}
 
@@ -139,9 +144,9 @@ export const GameCard = ({ game, onBetSubmit }: GameCardProps) => {
             </Button>
           )}
 
-          {game.userBet && (
+          {userBet && (
             <div className="text-center text-sm text-muted-foreground">
-              Palpite atual: {game.userBet.betA} x {game.userBet.betB}
+              Palpite atual: {userBet.bet_a} x {userBet.bet_b}
             </div>
           )}
         </div>
