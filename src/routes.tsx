@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { RouteObject } from 'react-router-dom';
 
 // Lazy load das páginas
+const IndexPage = lazy(() => import('./pages/Index'));
 const AuthPage = lazy(() => import('./pages/Auth'));
 const DashboardPage = lazy(() => import('./pages/Dashboard'));
 const MeuTimePage = lazy(() => import('./pages/MeuTime'));
@@ -12,7 +13,7 @@ const AdminPage = lazy(() => import('./pages/Admin'));
 export const routes: RouteObject[] = [
   {
     path: '/',
-    element: <DashboardPage />,
+    element: <IndexPage />,
   },
   {
     path: '/auth',
