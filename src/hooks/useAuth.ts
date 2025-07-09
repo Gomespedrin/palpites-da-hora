@@ -61,10 +61,13 @@ export const useAuth = () => {
 
   const signUp = async (email: string, password: string, nickname: string) => {
     try {
+      const redirectUrl = `${window.location.origin}/`;
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             nickname,
           },
@@ -75,7 +78,7 @@ export const useAuth = () => {
 
       toast({
         title: 'Conta criada!',
-        description: `Bem-vindo ao Palpites da Hora, ${nickname}!`,
+        description: `Verifique seu email para confirmar a conta. Bem-vindo, ${nickname}!`,
       });
 
       return { data, error: null };

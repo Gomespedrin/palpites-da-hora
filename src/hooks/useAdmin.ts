@@ -108,11 +108,11 @@ export const useAdmin = () => {
 
   const lockBetsBeforeGames = async () => {
     try {
-      // This would be called by a scheduled function
-      const { error } = await supabase.rpc('lock_bets_before_game');
+      // This is now handled by the game-scheduler edge function
+      const { error } = await supabase.functions.invoke('game-scheduler');
       if (error) throw error;
     } catch (error) {
-      console.error('Error locking bets:', error);
+      console.error('Error running scheduler:', error);
     }
   };
 
