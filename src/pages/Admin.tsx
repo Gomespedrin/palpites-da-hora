@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Navigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,10 +7,20 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useAdmin } from "@/hooks/useAdmin";
-import { useGames } from "@/hooks/useGames";
+import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/lib/supabase";
 
 const Admin = () => {
+  const { isAuthenticated, isAdmin } = useAuth();
+
+  // Verificar se está autenticado e se é admin
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (!isAdmin) {
+    return <Navigate to="/" replace />;
+  }
   const [allGames, setAllGames] = useState<any[]>([]);
   const [rounds, setRounds] = useState<any[]>([]);
   const [currentRound, setCurrentRound] = useState<any>(null);

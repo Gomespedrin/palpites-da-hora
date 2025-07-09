@@ -205,6 +205,14 @@ export type Database = {
         Args: { bet_a: number; bet_b: number; score_a: number; score_b: number }
         Returns: number
       }
+      can_edit_bet: {
+        Args: { game_id_param: string }
+        Returns: boolean
+      }
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
