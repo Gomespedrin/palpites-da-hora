@@ -8,10 +8,13 @@ import { Navigate } from 'react-router-dom';
 import heroImage from '@/assets/hero-soccer.jpg';
 
 const Index = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
+
+  console.log('Index: isAuthenticated =', isAuthenticated, 'loading =', loading);
 
   // Se o usuário já está autenticado, redireciona para o dashboard
   if (isAuthenticated) {
+    console.log('Index: Redirecionando para dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 

@@ -10,14 +10,20 @@ export const useAuth = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    console.log('useAuth: useEffect iniciado');
+    
     // Get initial session
     const getSession = async () => {
+      console.log('useAuth: Buscando sessão inicial...');
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('useAuth: Sessão inicial encontrada:', session);
       setUser(session?.user ?? null);
       
       if (session?.user) {
+        console.log('useAuth: Buscando perfil do usuário...');
         await fetchProfile(session.user.id);
       }
+      console.log('useAuth: setLoading(false) - inicial');
       setLoading(false);
     };
 
@@ -26,13 +32,16 @@ export const useAuth = () => {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('useAuth: Auth state changed:', event, session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
+          console.log('useAuth: Buscando perfil após auth change...');
           await fetchProfile(session.user.id);
         } else {
           setProfile(null);
         }
+        console.log('useAuth: setLoading(false) - auth change');
         setLoading(false);
       }
     );
@@ -94,6 +103,7 @@ export const useAuth = () => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log('useAuth: Tentando fazer login com:', email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -101,6 +111,7 @@ export const useAuth = () => {
 
       if (error) throw error;
 
+      console.log('useAuth: Login bem-sucedido:', data);
       toast({
         title: 'Login realizado!',
         description: 'Bem-vindo de volta!',
@@ -108,6 +119,7 @@ export const useAuth = () => {
 
       return { data, error: null };
     } catch (error: any) {
+      console.log('useAuth: Erro no login:', error);
       toast({
         title: 'Erro no login',
         description: error.message,
