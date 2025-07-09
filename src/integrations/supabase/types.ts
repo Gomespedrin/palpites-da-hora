@@ -14,13 +14,167 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bets: {
+        Row: {
+          bet_a: number
+          bet_b: number
+          created_at: string
+          game_id: string
+          id: string
+          locked: boolean
+          points_awarded: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bet_a: number
+          bet_b: number
+          created_at?: string
+          game_id: string
+          id?: string
+          locked?: boolean
+          points_awarded?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bet_a?: number
+          bet_b?: number
+          created_at?: string
+          game_id?: string
+          id?: string
+          locked?: boolean
+          points_awarded?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bets_game_id_fkey"
+            columns: ["game_id"]
+            isOneToOne: false
+            referencedRelation: "games"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bets_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      games: {
+        Row: {
+          created_at: string
+          date_time: string
+          finished: boolean
+          id: string
+          round_id: string
+          score_a: number | null
+          score_b: number | null
+          team_a: string
+          team_b: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          date_time: string
+          finished?: boolean
+          id?: string
+          round_id: string
+          score_a?: number | null
+          score_b?: number | null
+          team_a: string
+          team_b: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          date_time?: string
+          finished?: boolean
+          id?: string
+          round_id?: string
+          score_a?: number | null
+          score_b?: number | null
+          team_a?: string
+          team_b?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "games_round_id_fkey"
+            columns: ["round_id"]
+            isOneToOne: false
+            referencedRelation: "rounds"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rounds: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      users: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          nickname: string
+          points_total: number
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          nickname: string
+          points_total?: number
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          nickname?: string
+          points_total?: number
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      calculate_bet_points: {
+        Args: { bet_a: number; bet_b: number; score_a: number; score_b: number }
+        Returns: number
+      }
     }
     Enums: {
       [_ in never]: never
