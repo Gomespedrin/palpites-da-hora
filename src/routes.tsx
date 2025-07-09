@@ -1,5 +1,5 @@
 import { lazy } from 'react';
-import { RouteObject } from 'react-router-dom';
+import { RouteObject, createBrowserRouter } from 'react-router-dom';
 
 // Lazy load das páginas
 const IndexPage = lazy(() => import('./pages/Index'));
@@ -9,6 +9,7 @@ const MeuTimePage = lazy(() => import('./pages/MeuTime'));
 const TransferenciasPage = lazy(() => import('./pages/Transferencias'));
 const RankingPage = lazy(() => import('./pages/Ranking'));
 const AdminPage = lazy(() => import('./pages/Admin'));
+const NotFoundPage = lazy(() => import('./pages/NotFound'));
 
 export const routes: RouteObject[] = [
   {
@@ -39,4 +40,10 @@ export const routes: RouteObject[] = [
     path: '/admin',
     element: <AdminPage />,
   },
+  {
+    path: '*',
+    element: <NotFoundPage />,
+  },
 ];
+
+export const router = createBrowserRouter(routes);
