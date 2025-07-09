@@ -10,11 +10,17 @@ import heroImage from '@/assets/hero-soccer.jpg';
 const Index = () => {
   const { isAuthenticated, loading } = useAuth();
 
-  console.log('Index: isAuthenticated =', isAuthenticated, 'loading =', loading);
+  // Show loading while checking auth
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-lg">Carregando...</div>
+      </div>
+    );
+  }
 
   // Se o usuário já está autenticado, redireciona para o dashboard
   if (isAuthenticated) {
-    console.log('Index: Redirecionando para dashboard');
     return <Navigate to="/dashboard" replace />;
   }
 
